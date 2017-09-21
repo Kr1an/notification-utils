@@ -2,7 +2,13 @@
 # coding=utf-8
 
 from mysql.connector import MySQLConnection, Error
-from queries import auth_query, create_user_query, add_note_query, get_all_notes_query, get_note_by_id_query, delete_note_by_id_query
+from queries import auth_query, \
+					create_user_query, \
+					add_note_query, \
+					get_all_notes_query, \
+					get_note_by_id_query, \
+					delete_note_by_id_query, \
+					clear_notes_query
 
 
 def connect(host='localhost', database=None, user=None, password=None):
@@ -33,11 +39,13 @@ if __name__ == '__main__':
 	# 							user_id=user_id,
 	# 							title='New note', 
 	# 							text='Test note', 
-	# 							files=['home/anton/Downloads/', 'home/anton'], 
+								# files=['home/anton/Downloads/', 'home/anton'], 
+								# tags=['study', 'work'],
 	# 							connection=conn
 	# 						)
 	# response = get_all_notes_query(user_id=user_id, connection=conn)
-	# response = get_note_by_id_query(user_id=1, note_id=7, connection=conn)
-	# response = delete_note_by_id_query(user_id=user_id, note_id=7, connection=conn)
+	# response = get_note_by_id_query(user_id=user_id, note_id=17, connection=conn)
+	# response = delete_note_by_id_query(user_id=user_id, note_id=16, connection=conn)
+	response = clear_notes_query(user_id=user_id, connection=conn)	
 	print(response)
 	disconnect(conn)

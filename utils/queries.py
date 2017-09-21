@@ -2,26 +2,33 @@ import datetime
 from mysql.connector import Error
 
 
-def merge_note_with_files(notes=None):
+def _merge_note_with_files(notes=None):
 	"""Merge notes with the same id"""
 	if notes is  None:
 		return None
 
-	response = {}
+	response = []
+	duplicated = {}
 
 	for note in notes:
-		id = note[0]
-		same_note = response.get(id)
+		note_id = note[0]
+		same_note = duplicated.get(note_id)
 
-		if same_note is not None:
-			response[id][-1].append(note[-1])
+		if same_note is None:
+			duplicated[note_id] = list(note)
 		else:
-			response[id] = list(note)
-			file = response[id][-1] 
-			response[id][-1] = []
-			response[id][-1].append(file)
+			for i, field in enumerate(note):
+				if isinstance(duplicated[note_id][i], list):
+					if field not in duplicated[note_id][i] and field is not None:
+						duplicated[note_id][i].append(field)
+				elif field != duplicated[note_id][i] and field is not None:
+					tmp = duplicated[note_id][i]
+					duplicated[note_id][i] = []
+					duplicated[note_id][i].append(tmp)
+					duplicated[note_id][i].append(field)
 
-	response = list(response.values())
+	response = list(duplicated.values())
+
 	return response
 
 
@@ -66,7 +73,7 @@ def create_user_query(fullname=None, password=None, connection=None):
 		return response
 
 
-def add_note_query(user_id=None, title=None, text=None, files=None, connection=None):
+def add_note_query(user_id=None, title=None, text=None, files=None, tags=None, connection=None):
 	cursor = None
 	response = False
 
@@ -85,8 +92,8 @@ def add_note_query(user_id=None, title=None, text=None, files=None, connection=N
 						)
 
 		connection.commit()
-		add_files_query(files=files, note_id=cursor.lastrowid, connection=connection)
-
+		_add_files_query(files=files, note_id=cursor.lastrowid, connection=connection)
+		_add_tag_note_query(tags=tags, note_id=cursor.lastrowid, connection=connection)
 		response = True
 
 	finally:
@@ -94,7 +101,80 @@ def add_note_query(user_id=None, title=None, text=None, files=None, connection=N
 		return response	
 
 
-def add_files_query(files=None, note_id=None, connection=None):
+def _add_tag_note_query(tags=None, note_id=None, connection=None):
+	if tags is None or note_id is None or connection is None:
+		return
+
+	cursor = None
+
+	try:
+		tags_id = _get_or_create_tags_query(tags, connection)
+		cursor = connection.cursor()
+
+		for tag_id in tags_id:
+			cursor.execute("INSERT INTO tag_note (note_id, tag_id) \
+							VALUES ('{note_id}', '{tag_id}')"
+							.format(note_id=note_id,
+									tag_id=tag_id
+									)
+							)
+
+		connection.commit()
+
+	finally:
+		cursor.close()
+
+
+def _get_or_create_tags_query(tags=None, connection=None):
+	cursor = None
+	response = []
+
+	if tags is None or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+
+		for tag in tags:
+			cursor.execute("SELECT tag_id \
+							FROM tag \
+							WHERE title='{tag}' LIMIT 1"
+							.format(tag=tag))
+
+			tag_response = cursor.fetchone()
+			if tag_response is not None:
+				response.append(tag_response[0])
+			else:
+				tag_id = _create_tag_query(tag, connection)
+
+				if tag_id is not None:
+					response.append(tag_id)
+	finally:
+		cursor.close()
+		return response
+
+
+def _create_tag_query(tag=None, connection=None):
+	cursor = None
+	response = None
+
+	if tag is None or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+		cursor.execute("INSERT INTO tag (title) VALUES ('{title}')"
+						.format(title=tag))
+
+		response = cursor.lastrowid
+		connection.commit()
+
+	finally:
+		cursor.close()
+		return response
+
+
+def _add_files_query(files=None, note_id=None, connection=None):
 	if files is None or note_id is None or connection is None:
 		return
 
@@ -116,7 +196,6 @@ def add_files_query(files=None, note_id=None, connection=None):
 	finally:
 		cursor.close()
 
-
 def get_all_notes_query(user_id=None, connection=None):
 	cursor = None
 	response = None
@@ -126,14 +205,17 @@ def get_all_notes_query(user_id=None, connection=None):
 
 	try:
 		cursor = connection.cursor()
-		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, f.path \
+		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, t.title, f.path\
 						FROM note n \
 						LEFT OUTER JOIN file f ON f.note_id=n.note_id \
+						LEFT OUTER JOIN tag_note tn ON tn.note_id=n.note_id \
+						LEFT OUTER JOIN tag t ON tn.tag_id=t.tag_id \
 						WHERE n.user_id='{user_id}'"
 						.format(user_id=user_id))
 
 		notes = cursor.fetchall()
-		response = merge_note_with_files(notes)
+		response = _merge_note_with_files(notes)
+
 	finally:
 		cursor.close()
 		return response
@@ -148,14 +230,16 @@ def get_note_by_id_query(user_id=None, note_id=None, connection=None):
 
 	try:
 		cursor = connection.cursor()
-		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, f.path \
+		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, t.title, f.path\
 						FROM note n \
 						LEFT OUTER JOIN file f ON f.note_id=n.note_id \
+						LEFT OUTER JOIN tag_note tn ON tn.note_id=n.note_id \
+						LEFT OUTER JOIN tag t ON tn.tag_id=t.tag_id \
 						WHERE n.note_id='{note_id}' AND n.user_id='{user_id}'"
 						.format(note_id=note_id, user_id=user_id))
 
 		notes = cursor.fetchall()
-		response = merge_note_with_files(notes)[0]
+		response = _merge_note_with_files(notes)[0]
 
 	finally:
 		cursor.close()
@@ -174,6 +258,27 @@ def delete_note_by_id_query(user_id=None, note_id=None, connection=None):
 		cursor.execute("DELETE FROM note \
 						WHERE note_id='{note_id}' AND user_id='{user_id}'"
 						.format(note_id=note_id, user_id=user_id))
+
+		connection.commit()
+		response = True
+
+	finally:
+		cursor.close()
+		return response
+
+
+def clear_notes_query(user_id=None, connection=None):
+	cursor = None
+	response = False
+
+	if user_id is None or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+		cursor.execute("DELETE FROM note \
+						WHERE user_id='{user_id}'"
+						.format(user_id=user_id))
 
 		connection.commit()
 		response = True
