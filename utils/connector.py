@@ -24,23 +24,23 @@ def disconnect(connection=None):
 
 
 if __name__ == '__main__':
+	pass
+	# from queries import auth_query, \
+	# 				create_user_query, \
+	# 				add_note_query, \
+	# 				get_all_notes_query, \
+	# 				get_note_by_id_query, \
+	# 				delete_note_by_id_query, \
+	# 				clear_notes_query, \
+	# 				find_notes_by_title_query, \
+	# 				find_notes_by_text_query, \
+	# 				find_notes_by_date_query, \
+	# 				find_notes_by_tag_query, \
+	# 				update_note_by_id_query
 
-	from queries import auth_query, \
-					create_user_query, \
-					add_note_query, \
-					get_all_notes_query, \
-					get_note_by_id_query, \
-					delete_note_by_id_query, \
-					clear_notes_query, \
-					find_notes_by_title_query, \
-					find_notes_by_text_query, \
-					find_notes_by_date_query, \
-					find_notes_by_tag_query, \
-					update_note_by_id_query
 
-
-	conn = connect('localhost', 'notification_utils', 'nu_db_admin', '210jidojdxwq9223HAdas')
-	user_id = auth_query(fullname='lalala', password='lalala', connection=conn)
+	# conn = connect('localhost', 'notification_utils', 'nu_db_admin', '210jidojdxwq9223HAdas')
+	# user_id = auth_query(fullname='lalala', password='lalala', connection=conn)
 	# if user_id is None:
 	# 	response = create_user_query(fullname='lalala', password='lalala', connection=conn)
 	# response = add_note_query(

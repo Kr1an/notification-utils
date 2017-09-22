@@ -12,6 +12,7 @@ from utils.queries import \
     find_notes_by_date_query, \
     find_notes_by_tag_query, \
     update_note_by_id_query
+from setting.CONFIG import DB_CONFIG
 
 
 def authorized(func):
@@ -160,7 +161,11 @@ method_chooser = {
 
 def resolve_input(options):
     response = None
-    connection = connect('localhost', 'notification_utils', 'nu_db_admin', '210jidojdxwq9223HAdas')
+    connection = connect(
+                        DB_CONFIG['host'], 
+                        DB_CONFIG['database'], 
+                        DB_CONFIG['user'], 
+                        DB_CONFIG['password'])
     try:
         response = method_chooser[options['method_type']](options, connection)
 

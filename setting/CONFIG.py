@@ -173,6 +173,7 @@ GROUPED_CONFIG = [
                 ],
                 "optional": {
                     "help": "Getting all notes.",
+                    "action": "store_true",
                 },
             },
         ],
@@ -220,3 +221,11 @@ GROUPED_CONFIG = [
         ],
     },
 ]
+
+
+DB_CONFIG = {
+    "host": "localhost",
+    "database": "notification_utils",
+    "user": "nu_db_admin",
+    "password": "210jidojdxwq9223HAdas"
+} 
