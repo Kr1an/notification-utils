@@ -7,14 +7,12 @@ def parse_arguments():
     arguments_parser = argparse.ArgumentParser()
     add_positional_arguments(arguments_parser)
     add_optional_arguments(arguments_parser)
-    arguments_filtered_dict = {k: v for k, v in vars(arguments_parser.parse_args()).items() if v is not False and v is not None}
+    parsed_arguments = arguments_parser.parse_args()
+    arguments_filtered_dict = {k: v for k, v in vars(parsed_arguments).items() if v is not False and v is not None}
     names_of_method_type = [x['key'] for x in LIST_OF_MUTUAL_GROUPS]
-    print(names_of_method_type)
-    print(arguments_filtered_dict.keys())
     method_type = [x for x in arguments_filtered_dict.keys() if x in names_of_method_type][0]
     auth = {'fullname': arguments_filtered_dict['fullname'], "password": arguments_filtered_dict['password']}
-
-    return { 'method_type': method_type, 'auth': auth, "args": arguments_filtered_dict }
+    return {'method_type': method_type, 'auth': auth, "args": arguments_filtered_dict}
 
 
 def add_positional_arguments(arguments_parser):
@@ -23,7 +21,7 @@ def add_positional_arguments(arguments_parser):
 
 
 def add_optional_arguments(arguments_parser):
-    mutual_group = arguments_parser.add_mutually_exclusive_group()
+    mutual_group = arguments_parser.add_mutually_exclusive_group(required=True)
     for mutual_arg in LIST_OF_MUTUAL_GROUPS:
         mutual_group.add_argument(mutual_arg['name'], help=mutual_arg['help'], action="store_true")
 

@@ -60,7 +60,7 @@ GROUPED_CONFIG = [
                 ],
                 "optional": {
                     "help": "File(s) of new note.",
-                    "nargs": "+",
+                    "nargs": "*",
                 },
             },
             {
@@ -70,7 +70,7 @@ GROUPED_CONFIG = [
                 ],
                 "optional": {
                     "help": "File(s) of new note.",
-                    "nargs": "+",
+                    "nargs": "*",
                 },
             },
         ],
@@ -138,7 +138,41 @@ GROUPED_CONFIG = [
                 ],
                 "optional": {
                     "help": "Specify new files.",
-                    "nargs": "+",
+                    "nargs": "*",
+                },
+            },
+            {
+                "method": "update",
+                "positional": [
+                    "--update_with_tags",
+                ],
+                "optional": {
+                    "help": "Specify new tags.",
+                    "nargs": "*",
+                },
+            },
+        ],
+    },
+    {
+        "name": "Get Note(s)",
+        "description": "Getting note(s).",
+        "args": [
+            {
+                "method": "get",
+                "positional": [
+                    "--get_by_id",
+                ],
+                "optional": {
+                    "help": "Getting note by specific id.",
+                },
+            },
+            {
+                "method": "get",
+                "positional": [
+                    "--get_all",
+                ],
+                "optional": {
+                    "help": "Getting all notes.",
                 },
             },
         ],
@@ -147,15 +181,6 @@ GROUPED_CONFIG = [
         "name": "Find Note(s)",
         "description": "Finding note(s).",
         "args": [
-            {
-                "method": "find",
-                "positional": [
-                    "--find_by_id",
-                ],
-                "optional": {
-                    "help": "Specify finding note id.",
-                },
-            },
             {
                 "method": "find",
                 "positional": [
