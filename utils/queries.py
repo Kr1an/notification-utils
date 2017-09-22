@@ -267,7 +267,151 @@ def delete_note_by_id_query(user_id=None, note_id=None, connection=None):
 		return response
 
 
-def find_notes_by_title(user_id, )
+def find_notes_by_title_query(user_id=None, title=None, connection=None):
+	cursor = None
+	response = None
+
+	if user_id is None or title is None  or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, t.title, f.path\
+						FROM note n \
+						LEFT OUTER JOIN file f ON f.note_id=n.note_id \
+						LEFT OUTER JOIN tag_note tn ON tn.note_id=n.note_id \
+						LEFT OUTER JOIN tag t ON tn.tag_id=t.tag_id \
+						WHERE n.user_id='{user_id}' AND n.title='{title}'"
+						.format(user_id=user_id, title=title))
+
+		notes = cursor.fetchall()
+		response = _merge_note_with_files(notes)
+
+	finally:
+		cursor.close()
+		return response	
+
+
+def find_notes_by_text_query(user_id=None, text=None, connection=None):
+	cursor = None
+	response = None
+
+	if user_id is None or text is None  or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, t.title, f.path\
+						FROM note n \
+						LEFT OUTER JOIN file f ON f.note_id=n.note_id \
+						LEFT OUTER JOIN tag_note tn ON tn.note_id=n.note_id \
+						LEFT OUTER JOIN tag t ON tn.tag_id=t.tag_id \
+						WHERE n.user_id='{user_id}' AND n.text LIKE '%{text}%'"
+						.format(user_id=user_id, text=text))
+
+		notes = cursor.fetchall()
+		response = _merge_note_with_files(notes)
+
+	finally:
+		cursor.close()
+		return response	
+
+
+def find_notes_by_date_query(user_id=None, date=None, connection=None):
+	cursor = None
+	response = None
+
+	if user_id is None or date is None  or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, t.title, f.path\
+						FROM note n \
+						LEFT OUTER JOIN file f ON f.note_id=n.note_id \
+						LEFT OUTER JOIN tag_note tn ON tn.note_id=n.note_id \
+						LEFT OUTER JOIN tag t ON tn.tag_id=t.tag_id \
+						WHERE n.user_id='{user_id}' \
+						AND DAY(n.modified_date)=DAY('{date}') \
+						AND MONTH(n.modified_date)=MONTH('{date}') \
+						AND YEAR(n.modified_date)=YEAR('{date}')"
+						.format(user_id=user_id, date=date))
+
+		notes = cursor.fetchall()
+		response = _merge_note_with_files(notes)
+	finally:
+		cursor.close()
+		return response	
+
+
+def find_notes_by_tag_query(user_id=None, tag=None, connection=None):
+	cursor = None
+	response = None
+
+	if user_id is None or tag is None  or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+		cursor.execute("SELECT n.note_id, n.title, n.text, n.modified_date, t.title, f.path\
+						FROM note n \
+						LEFT OUTER JOIN file f ON f.note_id=n.note_id \
+						LEFT OUTER JOIN tag_note tn ON tn.note_id=n.note_id \
+						LEFT OUTER JOIN tag t ON tn.tag_id=t.tag_id \
+						WHERE n.user_id='{user_id}' \
+						AND t.title='{tag}'"
+						.format(user_id=user_id, tag=tag))
+
+		notes = cursor.fetchall()
+		response = _merge_note_with_files(notes)
+	except Error as e:
+		print(e)
+
+	finally:
+		cursor.close()
+		return response	
+
+
+def update_note_by_id_query(user_id=None, 
+							note_id=None, 
+							title=None, 
+							text=None, 
+							files=None, 
+							tags=None, 
+							connection=None):
+	cursor = None
+	response = False
+
+	if user_id is None or note_id is None or connection is None:
+		return response
+
+	try:
+		cursor = connection.cursor()
+
+		note = get_note_by_id_query(user_id=user_id, note_id=note_id, connection=connection)
+
+		if note is None:
+			return response
+
+		cursor.execute("UPDATE note \
+						SET title='{title}', text='{text}', modified_date='{modified_date}' \
+						WHERE note_id='{note_id}' AND user_id='{user_id}'"
+						.format(title=title, 
+								text=text, 
+								modified_date=datetime.datetime.now(), 
+								user_id=user_id,
+								note_id=note_id
+								)
+						)
+
+		connection.commit()
+		_add_files_query(files=files, note_id=note_id, connection=connection)
+		_add_tag_note_query(tags=tags, note_id=note_id, connection=connection)
+		response = True
+
+	finally:
+		cursor.close()
+		return response
 
 
 def clear_notes_query(user_id=None, connection=None):

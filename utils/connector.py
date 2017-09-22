@@ -8,7 +8,12 @@ from queries import auth_query, \
 					get_all_notes_query, \
 					get_note_by_id_query, \
 					delete_note_by_id_query, \
-					clear_notes_query
+					clear_notes_query, \
+					find_notes_by_title_query, \
+					find_notes_by_text_query, \
+					find_notes_by_date_query, \
+					find_notes_by_tag_query, \
+					update_note_by_id_query
 
 
 def connect(host='localhost', database=None, user=None, password=None):
@@ -37,15 +42,28 @@ if __name__ == '__main__':
 	# 	response = create_user_query(fullname='lalala', password='lalala', connection=conn)
 	# response = add_note_query(
 	# 							user_id=user_id,
-	# 							title='New note', 
+	# 							title='Find me', 
 	# 							text='Test note', 
-								# files=['home/anton/Downloads/', 'home/anton'], 
-								# tags=['study', 'work'],
+	# 							files=['home/anton/Downloads/', 'home/anton'], 
+	# 							tags=['study', 'work'],
 	# 							connection=conn
 	# 						)
 	# response = get_all_notes_query(user_id=user_id, connection=conn)
 	# response = get_note_by_id_query(user_id=user_id, note_id=17, connection=conn)
 	# response = delete_note_by_id_query(user_id=user_id, note_id=16, connection=conn)
-	response = clear_notes_query(user_id=user_id, connection=conn)	
-	print(response)
+	# response = clear_notes_query(user_id=user_id, connection=conn)
+	# response = find_notes_by_title_query(user_id=user_id, title='Find me', connection=conn)	
+	# response = find_notes_by_text_query(user_id=user_id, text='Test note', connection=conn)	
+	# response = find_notes_by_date_query(user_id=user_id, date='2017-09-22', connection=conn)
+	# response = find_notes_by_tag_query(user_id=user_id, tag='study', connection=conn)	
+	# response = update_note_by_id_query(
+	# 							user_id=user_id,
+	# 							note_id=19,
+	# 							title='Lalala', 
+	# 							text='Test note', 
+	# 							files=['home/anton/Downloads/', 'home/anton'], 
+	# 							tags=['study', 'kekeke'],
+	# 							connection=conn
+	# 						)
+	# print(response)
 	disconnect(conn)
