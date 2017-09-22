@@ -69,7 +69,7 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `notification_utils`.`tag` (
   `tag_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `title` VARCHAR(100) NULL UNIQUE,
+  `title` VARCHAR(100) NULL,
   PRIMARY KEY (`tag_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
