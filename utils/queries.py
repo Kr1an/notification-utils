@@ -55,7 +55,7 @@ def auth_query(fullname=None, password=None, connection=None):
 
 def create_user_query(fullname=None, password=None, connection=None):
 	cursor = None
-	response = False
+	response = None
 
 	if connection is None:
 		return response
@@ -66,7 +66,7 @@ def create_user_query(fullname=None, password=None, connection=None):
 						.format(fullname=fullname, password=password))
 
 		connection.commit()
-		response = True
+		response = cursor.lastrowid
 
 	finally:
 		cursor.close()
@@ -265,6 +265,9 @@ def delete_note_by_id_query(user_id=None, note_id=None, connection=None):
 	finally:
 		cursor.close()
 		return response
+
+
+def find_notes_by_title(user_id, )
 
 
 def clear_notes_query(user_id=None, connection=None):
