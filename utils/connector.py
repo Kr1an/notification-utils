@@ -1,14 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # coding=utf-8
 
-from mysql.connector import MySQLConnection, Error
+import cx_Oracle
 
 
 def connect(host='localhost', database=None, user=None, password=None):
 	""" Connect to MySQL database """
 	connection = None
 	try:
-		connection = MySQLConnection(password=password, user=user, host=host, database=database)
+		connection = cx_Oracle.connect("{user}/{password}@//{host}:1521/{database}".format(user=user, password=password, host=host, database=database))
 
 	finally:
 		return connection
@@ -19,7 +19,7 @@ def disconnect(connection=None):
 		if connection is not None:
 			connection.close()
 			return True
-	except Error:
+	except cx_Oracle.DatabaseError:
 		return False
 
 

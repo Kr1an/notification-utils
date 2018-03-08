@@ -1,104 +1,47 @@
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+CREATE TABLE account (
+  account_id NUMBER GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1),
+  fullname VARCHAR(100) NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  CONSTRAINT account_pk PRIMARY KEY (account_id)
+);
 
--- -----------------------------------------------------
--- Schema notification_utils
--- -----------------------------------------------------
+CREATE TABLE note (
+  note_id NUMBER GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1),
+  title VARCHAR(100) NULL,
+  text CLOB NULL,
+  modified_date DATE NULL,
+  account_id NUMBER NOT NULL,
+  CONSTRAINT note_pk PRIMARY KEY (note_id),
+  CONSTRAINT fk_account
+    FOREIGN KEY (account_id)
+    REFERENCES account(account_id)
+);
 
--- -----------------------------------------------------
--- Schema notification_utils
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `notification_utils` DEFAULT CHARACTER SET utf8 ;
-USE `notification_utils` ;
+CREATE TABLE attach (
+  attach_id NUMBER GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1),
+  path VARCHAR(300) NULL,
+  note_id NUMBER NOT NULL,
+  CONSTRAINT attach_pk PRIMARY KEY (attach_id),
+  CONSTRAINT fk_note
+    FOREIGN KEY (note_id)
+    REFERENCES note(note_id)
+);
 
--- -----------------------------------------------------
--- Table `notification_utils`.`user`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `notification_utils`.`user` (
-  `user_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `fullname` VARCHAR(100) NOT NULL,
-  `password` VARCHAR(100) NOT NULL,
-  PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+CREATE TABLE tag (
+  tag_id NUMBER GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1),
+  title VARCHAR(100) NULL,
+  CONSTRAINT tag_pk PRIMARY KEY (tag_id)
+);
 
-
--- -----------------------------------------------------
--- Table `notification_utils`.`note`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `notification_utils`.`note` (
-  `note_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `title` VARCHAR(100) NULL,
-  `text` LONGTEXT NULL,
-  `modified_date` DATETIME NULL,
-  `user_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`note_id`),
-  UNIQUE INDEX `note_id_UNIQUE` (`note_id` ASC),
-  INDEX `fk_note_user_idx` (`user_id` ASC),
-  CONSTRAINT `fk_note_user`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `notification_utils`.`user` (`user_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `notification_utils`.`file`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `notification_utils`.`file` (
-  `file_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `path` VARCHAR(300) NULL,
-  `note_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`file_id`),
-  INDEX `fk_file_note_idx` (`note_id` ASC),
-  CONSTRAINT `fk_file_note`
-    FOREIGN KEY (`note_id`)
-    REFERENCES `notification_utils`.`note` (`note_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `notification_utils`.`tag`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `notification_utils`.`tag` (
-  `tag_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `title` VARCHAR(100) NULL,
-  PRIMARY KEY (`tag_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `notification_utils`.`tag_note`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `notification_utils`.`tag_note` (
-  `tag_note_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `tag_id` INT UNSIGNED NOT NULL,
-  `note_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`tag_note_id`),
-  INDEX `fk_tag_note_tag_idx` (`tag_id` ASC),
-  INDEX `fk_tag_note_note_idx` (`note_id` ASC),
-  CONSTRAINT `fk_tag_note_tag`
-    FOREIGN KEY (`tag_id`)
-    REFERENCES `notification_utils`.`tag` (`tag_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_tag_note_note`
-    FOREIGN KEY (`note_id`)
-    REFERENCES `notification_utils`.`note` (`note_id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+CREATE TABLE tag_note (
+  tag_note_id NUMBER GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1),
+  tag_link NUMBER NOT NULL,
+  note_link NUMBER NOT NULL,
+  CONSTRAINT tag_note_pk PRIMARY KEY (tag_note_id),
+  CONSTRAINT fk_tag_link
+    FOREIGN KEY (tag_link)
+    REFERENCES tag(tag_id),
+   CONSTRAINT fk_note_link
+    FOREIGN KEY (note_link)
+    REFERENCES note(note_id) 
+);
